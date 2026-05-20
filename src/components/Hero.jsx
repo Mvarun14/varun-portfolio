@@ -317,7 +317,7 @@ export default function Hero() {
               <Avatar />
             </motion.span>
             <motion.span variants={chunk}>I&apos;m </motion.span>
-            <motion.span variants={chunk} className="selected-name">Phani&nbsp;Varun</motion.span>
+            <motion.span variants={chunk} className="selected-name">Phani&nbsp;Varun&nbsp;Munukuntla</motion.span>
             <motion.span variants={chunk}> — a Security Engineer fluent in </motion.span>
             <motion.span variants={chunk} className="italic-sharp">Application Security, GenAI and Backend Systems</motion.span>
             <motion.span variants={chunk}>. Based in the US and India, available to teams shipping AI they can actually trust, from first commit to production.</motion.span>

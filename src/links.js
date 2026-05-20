@@ -3,7 +3,7 @@
 
 export const CALENDAR_URL = 'https://calendar.app.google/SopNZ7h2mwS1yw9S7';
 
-export const RESUME_URL = 'https://drive.google.com/drive/folders/14Y1LLiVuA2McbeHfMdXxnL1fgsJohCMz?usp=sharing';
+export const RESUME_URL = 'https://drive.google.com/file/d/1YKKoujJoUZ2YyFQXKn_e-OpJizBZ7Kn3/view?usp=sharing';
 
 export const GITHUB_URL = 'https://github.com/Mvarun14';
 export const GITHUB_HANDLE = '@Mvarun14';

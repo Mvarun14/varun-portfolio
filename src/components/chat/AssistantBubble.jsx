@@ -69,6 +69,78 @@ function CaseStudyCard({ data, index }) {
   );
 }
 
+function CertificationCard({ cert, index }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.04, duration: 0.28, ease: 'easeOut' }}
+      className="flex items-center gap-2.5 bg-white border border-neutral-200/80 rounded-xl px-3 py-2 shadow-[0_2px_8px_rgba(0,0,0,0.03)]"
+    >
+      <div className="w-9 h-9 rounded-md bg-neutral-50 border border-neutral-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+        {cert.icon ? (
+          <img
+            src={cert.icon}
+            alt=""
+            className="w-6 h-6 object-contain"
+            loading="lazy"
+            draggable={false}
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <span className="text-[10px] font-semibold text-neutral-500 tracking-wider">
+            {cert.fallback || '·'}
+          </span>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-[12.5px] font-semibold text-neutral-900 truncate leading-tight">
+          {cert.title}
+        </div>
+        <div className="text-[11px] text-neutral-500 truncate leading-tight mt-0.5">
+          {cert.issuer}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function EducationCard({ entry, index }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1, duration: 0.35, ease: 'easeOut' }}
+      className="bg-white border border-neutral-200/80 rounded-2xl px-5 py-4 shadow-[0_4px_20px_rgba(0,0,0,0.04)]"
+    >
+      <div className="flex items-start gap-3">
+        <div className="w-12 h-12 rounded-lg bg-white border border-neutral-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+          {entry.icon ? (
+            <img
+              src={entry.icon}
+              alt={entry.school}
+              className="w-full h-full object-contain"
+              loading="lazy"
+              draggable={false}
+            />
+          ) : (
+            <span className="text-[10px] font-semibold text-neutral-500 tracking-wider">
+              {entry.fallback}
+            </span>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-[14px] font-semibold text-neutral-900 leading-snug">{entry.school}</div>
+          <div className="text-[12.5px] text-neutral-700 leading-snug mt-0.5">{entry.degree}</div>
+          <div className="text-[10px] tracking-[0.18em] uppercase text-neutral-500 font-medium mt-2">
+            {entry.dates}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 function TimelineCard({ entry, index }) {
   return (
     <motion.div
@@ -187,6 +259,20 @@ export default function AssistantBubble({ message, onChoice }) {
           <div className="mt-3 space-y-3 max-w-[90%] sm:max-w-[75%]">
             {message.timeline.map((entry, i) => (
               <TimelineCard key={entry.dates + entry.title} entry={entry} index={i} />
+            ))}
+          </div>
+        )}
+        {message.certifications && (
+          <div className="mt-3 space-y-2 max-w-[88%] sm:max-w-[68%]">
+            {message.certifications.map((cert, i) => (
+              <CertificationCard key={cert.title + cert.date} cert={cert} index={i} />
+            ))}
+          </div>
+        )}
+        {message.education && (
+          <div className="mt-3 space-y-3 max-w-[90%] sm:max-w-[72%]">
+            {message.education.map((entry, i) => (
+              <EducationCard key={entry.school} entry={entry} index={i} />
             ))}
           </div>
         )}

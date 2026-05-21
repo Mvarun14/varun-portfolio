@@ -1,14 +1,41 @@
-import { CALENDAR_URL, RESUME_URL, GITHUB_URL, OWNER_EMAIL } from '../../links';
+import { CALENDAR_URL, RESUME_URL, GITHUB_URL, LINKEDIN_URL, OWNER_EMAIL } from '../../links';
 import policyImg from '../../policy.jpeg';
 import webappImg from '../../webapp.jpeg';
 import apiImg from '../../api.jpeg';
 import cloudsecImg from '../../cloudsec.jpeg';
+import ubLogo from '../../ub.png';
+import cmrLogo from '../../cmr.jpg';
 
 // Devicon CDN — drop any icon by name + variant.
 const dev = (name, variant = 'original') =>
   `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${name}/${name}-${variant}.svg`;
 // Simple Icons CDN — used for logos Devicon doesn't carry (e.g. AI/security tools).
 const si = (slug, color = '000000') => `https://cdn.simpleicons.org/${slug}/${color}`;
+
+// Curated 5 — the ones that map closest to security / AI / cloud / backend.
+// The rest live on LinkedIn (linked via the followUp CTA below).
+const CERTIFICATIONS = [
+  { title: 'CompTIA Security+', issuer: 'CompTIA', icon: si('comptia', 'C8202F') },
+  { title: 'Google Cybersecurity Professional Certificate', issuer: 'Google', icon: dev('google') },
+  { title: 'Google AI Professional Certificate', issuer: 'Google', icon: dev('google') },
+  { title: 'AWS Academy Cloud Security Foundations', issuer: 'Amazon Web Services', icon: dev('amazonwebservices', 'original-wordmark') },
+  { title: 'Meta Back-End Developer Professional Certificate', issuer: 'Meta', icon: si('meta', '0467DF') },
+];
+
+const EDUCATION = [
+  {
+    school: 'University at Buffalo, SUNY',
+    degree: "Master's degree, Engineering Science",
+    dates: 'Aug 2024 — Feb 2026',
+    icon: ubLogo,
+  },
+  {
+    school: 'CMR College of Engineering & Technology',
+    degree: 'B.Tech, CSE — Specialization in Cyber Security',
+    dates: 'Sep 2021 — May 2024',
+    icon: cmrLogo,
+  },
+];
 
 const SKILLS = [
   { name: 'Python', icon: dev('python') },
@@ -80,6 +107,19 @@ export const REPLIES = {
   skills: {
     text: 'the stack I reach for — security, backend, and AI.',
     skills: SKILLS,
+  },
+  certifications: {
+    text: 'the five that map closest to my work — security, AI, cloud, and backend.',
+    certifications: CERTIFICATIONS,
+    followUp: {
+      delay: 800,
+      text: "Want the full list? Every credential I've earned lives on my LinkedIn.",
+      cta: { label: 'See all on LinkedIn', href: LINKEDIN_URL },
+    },
+  },
+  education: {
+    text: "two stops — a Master's in Engineering Science at SUNY Buffalo, and a B.Tech in CSE with a Cyber Security focus from CMR.",
+    education: EDUCATION,
   },
   experience: {
     text: "One year of focused work in application security, backend engineering, and AI security, extended through open-source contributions, side projects, and deep self-study into Agentic AI and GenAI failure modes. Comfortable owning a feature from first commit through to incident response.",
@@ -180,6 +220,16 @@ const INTENT_KEYWORDS = {
   skills: [
     'skill', 'skills', 'tech', 'stack', 'tools', 'tooling', 'languages', 'know',
     'tech stack', 'what do you use', 'what use', 'what.*use',
+  ],
+  certifications: [
+    'cert', 'certs', 'certification', 'certifications', 'certificate', 'certificates',
+    'credential', 'credentials', 'creds', 'qualifications', 'licenses', 'licences',
+  ],
+  education: [
+    'education', 'degree', 'degrees', 'school', 'schooling', 'college', 'university',
+    'studied', 'study', 'studies', 'studying', 'masters', "master's", 'bachelor',
+    'bachelors', "bachelor's", 'btech', 'b.tech', 'grad', 'graduate', 'undergraduate',
+    'where did you study', 'academic',
   ],
   availability: [
     'avail', 'available', 'hire', 'hiring', 'free', 'open', 'when can', 'right now',

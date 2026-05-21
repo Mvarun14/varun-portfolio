@@ -39,6 +39,8 @@ const CloseIcon = () => (
 const PILLS = [
   { label: 'see my work', kind: 'work', sparkles: true, arrow: 'down' },
   { label: 'skills you have?', kind: 'skills' },
+  { label: 'certifications you have?', kind: 'certifications' },
+  { label: 'where did you study?', kind: 'education' },
   { label: 'experience you have?', kind: 'experience' },
   { label: "what's your availability?", kind: 'availability' },
   { label: 'wanna chat?', kind: 'chat', arrow: 'upRight' },
@@ -123,6 +125,8 @@ export default function Hero() {
         cases: reply.cases,
         skills: reply.skills,
         timeline: reply.timeline,
+        certifications: reply.certifications,
+        education: reply.education,
         cta: reply.cta,
       });
 

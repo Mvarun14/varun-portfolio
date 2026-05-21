@@ -8,6 +8,8 @@ export const RESUME_URL = 'https://drive.google.com/file/d/1YKKoujJoUZ2YyFQXKn_e
 export const GITHUB_URL = 'https://github.com/Mvarun14';
 export const GITHUB_HANDLE = '@Mvarun14';
 
+export const LINKEDIN_URL = 'https://www.linkedin.com/in/mpvarun/';
+
 // Web3Forms — drops visitor messages into phanivarunm@gmail.com.
 // Get a free access key at https://web3forms.com (use your email phanivarunm@gmail.com),
 // paste it here, and submissions start arriving in your inbox.

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import Widget from './Widget';
 
-const INTERESTS = ['Cricket', 'Reading', 'Chess', 'Music', 'Open Source', 'AI Security'];
+const INTERESTS = ['Cricket', 'Reading', 'Chess', 'Music', 'Hackathons', 'AI Security'];
 
 export default function InterestsWidget({ style }) {
   return (

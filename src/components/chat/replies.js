@@ -1,4 +1,4 @@
-import { CALENDAR_URL, RESUME_URL, GITHUB_URL } from '../../links';
+import { CALENDAR_URL, RESUME_URL, GITHUB_URL, OWNER_EMAIL } from '../../links';
 import policyImg from '../../policy.jpeg';
 import webappImg from '../../webapp.jpeg';
 import apiImg from '../../api.jpeg';
@@ -32,6 +32,9 @@ const SKILLS = [
   { name: 'OWASP ZAP', icon: si('owasp', '000000') },
   { name: 'Flask', icon: dev('flask') },
   { name: 'Django', icon: dev('django', 'plain') },
+  { name: 'OpenAI', icon: 'https://api.iconify.design/simple-icons/openai.svg?color=%23000000' },
+  { name: 'Anthropic', icon: si('anthropic', 'D97757') },
+  { name: 'Google AI Studio', icon: si('googlegemini', '4796E3') },
 ];
 
 // Reply templates keyed by intent.
@@ -44,24 +47,28 @@ export const REPLIES = {
         subtitle: 'Static Analysis, GenAI',
         tag: 'POL',
         image: policyImg,
+        href: 'https://github.com/Mvarun14/Policy-Driven-Code-Reviewer',
       },
       {
         title: 'Web Application Security, Automation & CI Validation Framework',
         subtitle: 'AppSec, CI/CD',
         tag: 'WEB',
         image: webappImg,
+        href: 'https://github.com/Mvarun14/Web-Application-Security--Automation---CI-Validation-Framework',
       },
       {
         title: 'Adaptive API Risk Gate',
         subtitle: 'Runtime API security',
         tag: 'API',
         image: apiImg,
+        href: 'https://github.com/Mvarun14/Adaptive-API-Risk-Gate',
       },
       {
         title: 'Secure Cloud File Management',
         subtitle: 'Cloud Security',
         tag: 'CLD',
         image: cloudsecImg,
+        href: 'https://github.com/Mvarun14/Secure-Cloud-File-Management',
       },
     ],
     followUp: {
@@ -131,7 +138,7 @@ export const REPLIES = {
     text: "Security engineer who sits at the design table so threat-model output is something engineers and PMs actually use.",
   },
   availability: {
-    text: 'Currently exploring new opportunities focused on Backend and AI security across production systems. Open to full-time, contract, or short engagements. Based in India and the US, open to relocate.',
+    text: 'Currently exploring new opportunities focused on Application Security, Backend, and AI security across production systems. Open to full-time, contract, or short engagements. Based in India and the US, open to relocate.',
     followUp: {
       delay: 700,
       text: "Easiest way to reach me — drop your email or LinkedIn handle and I'll reply within 24 hours.",
@@ -148,8 +155,16 @@ export const REPLIES = {
   },
   // Catch-all for anything unrelated to the portfolio.
   fallback: {
-    text: "Thanks for the message! Drop your email or LinkedIn and I'll get back to you personally.",
-    placeholder: 'your email or LinkedIn…',
+    text: "I can only answer questions about Varun — his work, skills, and experience. If you'd like to ask or know anything more, feel free to email him directly.",
+    cta: { label: 'Email Varun', href: `mailto:${OWNER_EMAIL}`, icon: 'mail' },
+  },
+  // Triggered when input fails validation (looks like an injection payload, too long, etc.).
+  invalid: {
+    text: "That message looks unusual, so I won't process it. If you have a genuine question, please email Varun directly.",
+    cta: { label: 'Email Varun', href: `mailto:${OWNER_EMAIL}`, icon: 'mail' },
+  },
+  rate_limited: {
+    text: "One moment — you're sending messages a bit fast. Give it a second and try again.",
   },
   thanks: {
     text: "Got it — I'll reach back within 24 hours.",

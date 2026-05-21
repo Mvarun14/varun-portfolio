@@ -15,7 +15,7 @@ export default function ResumeWidget({ style, show = true }) {
     : { opacity: 0, scale: 0.85, y: 24 };
 
   return (
-    <a href={RESUME_URL} target="_blank" rel="noreferrer" className="contents">
+    <a href={RESUME_URL} target="_blank" rel="noopener noreferrer" className="contents">
       <motion.div
         className="absolute will-change-transform"
         style={style}

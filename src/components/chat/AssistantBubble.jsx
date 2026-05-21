@@ -23,12 +23,19 @@ const DownloadIcon = () => (
   </svg>
 );
 
+const MailIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+    <polyline points="22,6 12,13 2,6" />
+  </svg>
+);
+
 function CaseStudyCard({ data, index }) {
   return (
     <motion.a
       href={data.href || '#'}
       target={data.href ? '_blank' : undefined}
-      rel={data.href ? 'noreferrer' : undefined}
+      rel={data.href ? 'noopener noreferrer' : undefined}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08, duration: 0.3, ease: 'easeOut' }}
@@ -133,6 +140,7 @@ export default function AssistantBubble({ message, onChoice }) {
                   className="w-7 h-7 object-contain"
                   loading="lazy"
                   draggable={false}
+                  referrerPolicy="no-referrer"
                 />
               </motion.div>
             ))}
@@ -142,15 +150,16 @@ export default function AssistantBubble({ message, onChoice }) {
           <div className="mt-3">
             <motion.a
               href={message.cta.href}
-              target="_blank"
-              rel="noreferrer"
+              target={message.cta.href?.startsWith('mailto:') ? undefined : '_blank'}
+              rel="noopener noreferrer"
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.97 }}
               className="inline-flex items-center gap-2 bg-neutral-900 text-white text-[13px] font-semibold px-4 py-2 rounded-full hover:bg-neutral-800 transition-colors shadow-[0_4px_20px_-6px_rgba(0,0,0,0.3)]"
             >
-              {message.cta.icon === 'download' ? <DownloadIcon /> : null}
+              {message.cta.icon === 'download' && <DownloadIcon />}
+              {message.cta.icon === 'mail' && <MailIcon />}
               {message.cta.label}
-              {message.cta.icon !== 'download' ? <ArrowUpRight /> : null}
+              {!message.cta.icon && <ArrowUpRight />}
             </motion.a>
           </div>
         )}

@@ -7,20 +7,22 @@
     <title>Phani Varun — Security Engineer</title>
     <meta name="description" content="Security Engineer across the US and India, fluent in Application Security, GenAI, and Backend Systems." />
 
+    <!--
+      Security headers — Content-Security-Policy is injected only in
+      production via vite.config.js (Vite dev HMR uses inline modules that
+      need a looser policy). Hosting platforms should also serve these
+      as real HTTP response headers when available.
+    -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="color-scheme" content="light" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      rel="preload"
+      rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fragment+Mono&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,300;0,400;1,300;1,400&family=Poppins:wght@300;400;500;600;700&display=swap"
-      as="style"
-      onload="this.onload=null;this.rel='stylesheet'"
     />
-    <noscript>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fragment+Mono&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,300;0,400;1,300;1,400&family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet"
-      />
-    </noscript>
   </head>
   <body>
     <div id="root"></div>

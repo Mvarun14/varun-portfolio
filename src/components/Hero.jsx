@@ -6,6 +6,7 @@ import AssistantBubble from './chat/AssistantBubble';
 import TypingBubble from './chat/TypingBubble';
 import { REPLIES, classifyIntent } from './chat/replies';
 import { sendMessage, OWNER_EMAIL } from './chat/sendMessage';
+import { validateInput, validateEmail, validateName, checkRate, LIMITS } from '../security/validateInput';
 
 const ArrowDown = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -52,8 +53,10 @@ function nearBottom(threshold = 200) {
   );
 }
 
+// Email validation lives in security/validateInput.js; this thin wrapper keeps
+// callsites readable while routing through the hardened validator.
 function isValidEmail(s) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((s || '').trim());
+  return validateEmail(s);
 }
 
 const chunk = {
@@ -79,6 +82,8 @@ export default function Hero() {
   const [pendingIntent, setPendingIntent] = useState(null);
   const threadEndRef = useRef(null);
   const timersRef = useRef([]);
+  // Rate-limit tracker — shared across all submit paths.
+  const rateTracker = useRef({ last: 0 });
   const hasThread = thread.length > 0 || isTyping;
 
   useEffect(() => {
@@ -199,14 +204,47 @@ export default function Hero() {
     runReply(choice.kind, choice.label);
   }
 
+  function respondInvalid({ resetCompose = false, resetContact = false } = {}) {
+    setInput('');
+    if (resetCompose) {
+      setCompose({ active: false, step: null, data: {} });
+      setPlaceholder(DEFAULT_PLACEHOLDER);
+    }
+    if (resetContact) {
+      setContactMode(false);
+      setPendingIntent(null);
+      setPlaceholder(DEFAULT_PLACEHOLDER);
+    }
+    pushUser('(message hidden — looked unusual)');
+    const invalid = REPLIES.invalid;
+    typeThen(() => pushAssistant({ text: invalid.text, cta: invalid.cta }), 300);
+  }
+
+  function respondRateLimited(preview) {
+    setInput('');
+    pushUser(preview.length > 80 ? `${preview.slice(0, 80)}…` : preview);
+    typeThen(() => pushAssistant({ text: REPLIES.rate_limited.text }), 200);
+  }
+
   function handleInputSubmit(e) {
     if (e) e.preventDefault();
     const trimmed = input.trim();
     if (!trimmed) return;
 
+    // Global rate limit — applies to every submit path.
+    const rate = checkRate(rateTracker.current);
+    if (!rate.ok) {
+      respondRateLimited(trimmed);
+      return;
+    }
+
     // --- COMPOSE FLOW (name -> email -> message -> send) ---
     if (compose.active) {
       if (compose.step === 'name') {
+        if (!validateName(trimmed)) {
+          respondInvalid({ resetCompose: true });
+          return;
+        }
         pushUser(trimmed);
         setInput('');
         const next = { active: true, step: 'email', data: { ...compose.data, name: trimmed } };
@@ -231,6 +269,11 @@ export default function Hero() {
         return;
       }
       if (compose.step === 'message') {
+        const v = validateInput(trimmed, 'message');
+        if (!v.valid) {
+          respondInvalid({ resetCompose: true });
+          return;
+        }
         pushUser(trimmed);
         setInput('');
         const data = { ...compose.data, message: trimmed };
@@ -241,6 +284,13 @@ export default function Hero() {
 
     // --- SINGLE-FIELD CONTACT FLOW (after availability / fallback) ---
     if (contactMode) {
+      // The single field accepts an email or short LinkedIn-like handle; gate
+      // against payload-shaped input but allow URLs.
+      const v = validateInput(trimmed, 'chat');
+      if (!v.valid) {
+        respondInvalid({ resetContact: true });
+        return;
+      }
       pushUser(trimmed);
       setInput('');
       setContactMode(false);
@@ -273,6 +323,11 @@ export default function Hero() {
     }
 
     // --- NORMAL FREE-FORM QUERY ---
+    const v = validateInput(trimmed, 'chat');
+    if (!v.valid) {
+      respondInvalid();
+      return;
+    }
     handleQuery(trimmed);
     setInput('');
   }
@@ -396,6 +451,9 @@ export default function Hero() {
               placeholder={placeholder}
               className="ask-input pr-14"
               autoComplete="off"
+              spellCheck="true"
+              maxLength={compose.step === 'message' ? LIMITS.message : LIMITS.chat}
+              aria-label="Ask Varun anything"
             />
             <button
               type="submit"

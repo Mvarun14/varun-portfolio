@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import Hero from './components/Hero';
 import MagneticCursor from './components/MagneticCursor';
 import WorkSection from './components/WorkSection';
+import NotFoundPage from './pages/NotFoundPage';
+import Playground404 from './pages/Playground404';
 
 const THEME_STORAGE_KEY = 'portfolio-theme';
 
@@ -35,6 +37,29 @@ function ThemeToggle({ theme, onToggle }) {
   );
 }
 
+function PortfolioHome() {
+  return (
+    <>
+      <Hero />
+      <WorkSection />
+    </>
+  );
+}
+
+function RouteView() {
+  const [path, setPath] = useState(window.location.pathname);
+
+  useEffect(() => {
+    const syncPath = () => setPath(window.location.pathname);
+    window.addEventListener('popstate', syncPath);
+    return () => window.removeEventListener('popstate', syncPath);
+  }, []);
+
+  if (path === '/' || path === '/index.html') return <PortfolioHome />;
+  if (path === '/play') return <Playground404 />;
+  return <NotFoundPage />;
+}
+
 export default function App() {
   const [theme, setTheme] = useState(() => {
     if (typeof window === 'undefined') return 'light';
@@ -57,8 +82,7 @@ export default function App() {
         theme={theme}
         onToggle={() => setTheme((current) => (current === 'midnight' ? 'light' : 'midnight'))}
       />
-      <Hero />
-      <WorkSection />
+      <RouteView />
     </div>
   );
 }

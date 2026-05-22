@@ -18,6 +18,9 @@ function supportsFinePointer() {
 export default function MagneticCursor() {
   const cursorRef = useRef(null);
   const rafRef = useRef(null);
+  const visibleRef = useRef(false);
+  const hoveringRef = useRef(false);
+  const labelRef = useRef('');
   const positionRef = useRef({
     currentX: 0,
     currentY: 0,
@@ -50,8 +53,11 @@ export default function MagneticCursor() {
 
     const updateCursor = () => {
       const state = positionRef.current;
-      state.currentX += (state.targetX - state.currentX) * 0.18;
-      state.currentY += (state.targetY - state.currentY) * 0.18;
+      const dx = state.targetX - state.currentX;
+      const dy = state.targetY - state.currentY;
+
+      state.currentX += dx * 0.24;
+      state.currentY += dy * 0.24;
 
       if (cursorRef.current) {
         cursorRef.current.style.transform = `translate3d(${state.currentX}px, ${state.currentY}px, 0) translate(-50%, -50%)`;
@@ -64,10 +70,22 @@ export default function MagneticCursor() {
       const element = target instanceof Element ? target : null;
       const textInput = element?.closest(TEXT_INPUT_SELECTOR);
       const interactive = element?.closest(INTERACTIVE_SELECTOR);
+      const nextVisible = !textInput;
+      const nextHovering = Boolean(interactive) && !textInput;
+      const nextLabel = textInput ? '' : interactive?.dataset.cursorLabel || '';
 
-      setVisible(!textInput);
-      setHovering(Boolean(interactive) && !textInput);
-      setLabel(textInput ? '' : interactive?.dataset.cursorLabel || '');
+      if (visibleRef.current !== nextVisible) {
+        visibleRef.current = nextVisible;
+        setVisible(nextVisible);
+      }
+      if (hoveringRef.current !== nextHovering) {
+        hoveringRef.current = nextHovering;
+        setHovering(nextHovering);
+      }
+      if (labelRef.current !== nextLabel) {
+        labelRef.current = nextLabel;
+        setLabel(nextLabel);
+      }
     };
 
     const handlePointerMove = (event) => {
@@ -75,16 +93,22 @@ export default function MagneticCursor() {
       state.targetX = event.clientX;
       state.targetY = event.clientY;
 
-      if (!visible) {
+      if (!visibleRef.current) {
         state.currentX = event.clientX;
         state.currentY = event.clientY;
       }
 
-      setVisible(true);
       updateHoverState(event.target);
     };
 
-    const handlePointerLeave = () => setVisible(false);
+    const handlePointerLeave = () => {
+      visibleRef.current = false;
+      hoveringRef.current = false;
+      labelRef.current = '';
+      setVisible(false);
+      setHovering(false);
+      setLabel('');
+    };
 
     window.addEventListener('pointermove', handlePointerMove, { passive: true });
     document.addEventListener('pointerleave', handlePointerLeave);
@@ -95,7 +119,7 @@ export default function MagneticCursor() {
       document.removeEventListener('pointerleave', handlePointerLeave);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [enabled, visible]);
+  }, [enabled]);
 
   if (!enabled) return null;
 

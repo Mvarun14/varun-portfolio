@@ -205,7 +205,7 @@ export default function AssistantBubble({ message, onChoice }) {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.05, duration: 0.3, type: 'spring', stiffness: 240, damping: 22 }}
                 whileHover={{ y: -2, scale: 1.08 }}
-                className="w-12 h-12 rounded-xl bg-white border border-neutral-200/80 flex items-center justify-center shadow-[0_4px_14px_rgba(0,0,0,0.04)] cursor-default"
+                className="skill-icon-card w-12 h-12 rounded-xl bg-white border border-neutral-200/80 flex items-center justify-center shadow-[0_4px_14px_rgba(0,0,0,0.04)] cursor-default"
               >
                 <img
                   src={s.icon}

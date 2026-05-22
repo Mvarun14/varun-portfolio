@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
+import { getFloatProfile } from './floatProfile';
 
 function useIsDesktop() {
   const [isDesktop, setIsDesktop] = useState(() => {
@@ -33,12 +34,10 @@ export default function Widget({
 }) {
   const isDesktop = useIsDesktop();
 
-  const float = useMemo(() => ({
-    duration: 4 + Math.random() * 2.5,
-    amplitude: 4 + Math.random() * 4,
-    phase: Math.random() * 1.2,
-    entranceDelay: Math.random() * 0.6,
-  }), []);
+  const float = useMemo(
+    () => getFloatProfile(`${href || to || className || 'widget'}:${rotate}:${JSON.stringify(style)}`),
+    [className, href, rotate, style, to]
+  );
 
   const variants = {
     rest: { rotate: isDesktop ? rotate : 0, scale: 1 },

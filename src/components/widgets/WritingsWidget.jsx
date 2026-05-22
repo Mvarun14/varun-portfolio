@@ -1,15 +1,14 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { getFloatProfile } from './floatProfile';
 
 const MEDIUM_URL = 'https://medium.com/@phanivarun';
 
 export default function WritingsWidget({ style, show = true }) {
-  const float = useMemo(() => ({
-    duration: 4 + Math.random() * 2.5,
-    amplitude: 4 + Math.random() * 4,
-    phase: Math.random() * 1.2,
-    entranceDelay: Math.random() * 0.6,
-  }), []);
+  const float = useMemo(
+    () => getFloatProfile(`writings:${JSON.stringify(style)}`),
+    [style]
+  );
 
   const target = show
     ? { opacity: 1, scale: 1, y: [0, -float.amplitude, 0] }

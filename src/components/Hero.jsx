@@ -70,6 +70,8 @@ let messageIdSeed = 0;
 const newId = () => `m_${++messageIdSeed}`;
 
 const DEFAULT_PLACEHOLDER = 'ask Varun anything...';
+const getTypingDelay = () => 700 + Math.random() * 500;
+const FOLLOW_UP_TYPING_DELAY = 2200;
 
 export default function Hero() {
   const [thread, setThread] = useState([]);
@@ -104,12 +106,13 @@ export default function Hero() {
     setThread((t) => [...t, { id: newId(), role: 'assistant', ...payload }]);
   }
 
-  function typeThen(fn, ms = 700 + Math.random() * 500) {
+  function typeThen(fn, ms) {
+    const delay = ms ?? getTypingDelay();
     setIsTyping(true);
     const t = setTimeout(() => {
       setIsTyping(false);
       fn();
-    }, ms);
+    }, delay);
     timersRef.current.push(t);
   }
 
@@ -137,21 +140,23 @@ export default function Hero() {
       }
 
       if (reply.followUp) {
-        const t2 = setTimeout(() => {
-          typeThen(() => {
-            pushAssistant({
-              text: reply.followUp.text,
-              cta: reply.followUp.cta,
-              choices: reply.followUp.choices,
-            });
-            if (reply.followUp.placeholder) {
-              setContactMode(true);
-              setPlaceholder(reply.followUp.placeholder);
-              setPendingIntent({ kind: intent, originalText });
-            }
-          }, 600);
-        }, reply.followUp.delay);
-        timersRef.current.push(t2);
+        const followUpDelay = Math.max(
+          reply.followUp.delay ?? FOLLOW_UP_TYPING_DELAY,
+          FOLLOW_UP_TYPING_DELAY
+        );
+
+        typeThen(() => {
+          pushAssistant({
+            text: reply.followUp.text,
+            cta: reply.followUp.cta,
+            choices: reply.followUp.choices,
+          });
+          if (reply.followUp.placeholder) {
+            setContactMode(true);
+            setPlaceholder(reply.followUp.placeholder);
+            setPendingIntent({ kind: intent, originalText });
+          }
+        }, followUpDelay);
       }
     });
   }
@@ -394,7 +399,7 @@ export default function Hero() {
                 transition={{ duration: 0.2 }}
                 onClick={closeChat}
                 aria-label="Close chat"
-                className="sticky top-20 z-30 ml-auto flex items-center gap-1 bg-white/90 backdrop-blur-md border border-neutral-200/70 text-neutral-700 hover:text-neutral-900 hover:bg-white text-[11px] font-medium px-2.5 py-1.5 rounded-full shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-colors"
+                className="premium-action sticky top-20 z-30 ml-auto flex items-center gap-1 bg-white/90 backdrop-blur-md border border-neutral-200/70 text-neutral-700 hover:text-neutral-900 hover:bg-white text-[11px] font-medium px-2.5 py-1.5 rounded-full shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-colors"
               >
                 <CloseIcon />
                 <span>clear</span>
@@ -428,7 +433,7 @@ export default function Hero() {
                   key={p.label}
                   onClick={() => handleQuery(p.label, p.kind)}
                   disabled={used}
-                  className={`pill ${p.sparkles && !used ? 'pill-active' : ''} ${used ? 'pill-used' : ''}`}
+                  className={`pill premium-action ${p.sparkles && !used ? 'pill-active' : ''} ${used ? 'pill-used' : ''}`}
                 >
                   {p.sparkles && !used && (
                     <>
@@ -463,7 +468,7 @@ export default function Hero() {
               type="submit"
               disabled={!input.trim()}
               aria-label="Send"
-              className={`absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
+              className={`premium-action absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
                 input.trim()
                   ? 'bg-neutral-900 text-white hover:bg-neutral-800 shadow-md'
                   : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'

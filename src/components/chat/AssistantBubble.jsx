@@ -40,7 +40,8 @@ function CaseStudyCard({ data, index }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08, duration: 0.3, ease: 'easeOut' }}
       whileHover={{ y: -2 }}
-      className="group flex items-center justify-between bg-white border border-neutral-200/80 rounded-2xl px-4 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:border-neutral-300 transition-colors"
+      data-cursor-label="View project"
+      className="project-card group flex items-center justify-between bg-white border border-neutral-200/80 rounded-2xl px-4 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:border-neutral-300 transition-colors"
     >
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-neutral-100 to-neutral-200 flex-shrink-0 flex items-center justify-center">
@@ -226,7 +227,7 @@ export default function AssistantBubble({ message, onChoice }) {
               rel="noopener noreferrer"
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.97 }}
-              className="inline-flex items-center gap-2 bg-neutral-900 text-white text-[13px] font-semibold px-4 py-2 rounded-full hover:bg-neutral-800 transition-colors shadow-[0_4px_20px_-6px_rgba(0,0,0,0.3)]"
+              className="premium-action inline-flex items-center gap-2 bg-neutral-900 text-white text-[13px] font-semibold px-4 py-2 rounded-full hover:bg-neutral-800 transition-colors shadow-[0_4px_20px_-6px_rgba(0,0,0,0.3)]"
             >
               {message.cta.icon === 'download' && <DownloadIcon />}
               {message.cta.icon === 'mail' && <MailIcon />}
@@ -244,7 +245,7 @@ export default function AssistantBubble({ message, onChoice }) {
                 disabled={message.resolved}
                 whileHover={!message.resolved ? { y: -1 } : undefined}
                 whileTap={!message.resolved ? { scale: 0.97 } : undefined}
-                className={`px-5 py-2 text-[13px] font-medium rounded-full transition-colors ${
+                className={`premium-action px-5 py-2 text-[13px] font-medium rounded-full transition-colors ${
                   c.value === 'yes'
                     ? 'bg-neutral-900 text-white hover:bg-neutral-800 shadow-[0_4px_20px_-6px_rgba(0,0,0,0.3)]'
                     : 'bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50'

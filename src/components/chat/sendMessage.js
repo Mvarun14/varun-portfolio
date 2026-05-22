@@ -32,7 +32,7 @@ export async function sendMessage({ name, email, message, subject } = {}) {
     const data = await res.json().catch(() => ({}));
     if (data && data.success === false) return { ok: false, reason: 'rejected' };
     return { ok: true };
-  } catch (e) {
+  } catch {
     return { ok: false, reason: 'network' };
   }
 }

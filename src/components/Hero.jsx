@@ -61,17 +61,31 @@ function isValidEmail(s) {
   return validateEmail(s);
 }
 
-const chunk = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
-};
-
 let messageIdSeed = 0;
 const newId = () => `m_${++messageIdSeed}`;
 
 const DEFAULT_PLACEHOLDER = 'ask Varun anything...';
 const getTypingDelay = () => 700 + Math.random() * 500;
 const FOLLOW_UP_TYPING_DELAY = 2200;
+
+const heroPhraseReveal = {
+  hidden: { opacity: 0, y: 6 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.32, ease: 'easeOut' },
+  },
+};
+
+const pillReveal = {
+  hidden: { opacity: 0, y: 8, scale: 0.98 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.24, ease: 'easeOut' },
+  },
+};
 
 export default function Hero() {
   const [thread, setThread] = useState([]);
@@ -368,23 +382,35 @@ export default function Hero() {
       <div className="relative z-10 mx-auto w-full max-w-[920px] px-6 sm:px-8">
         <motion.section
           className="pt-24 pb-12"
-          animate={{ opacity: hasThread ? 0.25 : 1 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: hasThread ? 0.25 : 1, y: 0 }}
+          transition={{
+            opacity: { duration: 0.38, delay: hasThread ? 0 : 0.18, ease: 'easeOut' },
+            y: { duration: 0.38, delay: 0.18, ease: 'easeOut' },
+          }}
         >
           <motion.h1
             className="font-plex text-[clamp(24px,3vw,40px)] leading-[1.18] tracking-[-0.02em] font-medium text-neutral-900"
             initial="hidden"
             animate="visible"
-            transition={{ staggerChildren: 0.18, delayChildren: 0.15 }}
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  delayChildren: 0.24,
+                  staggerChildren: 0.055,
+                },
+              },
+            }}
           >
-            <motion.span variants={chunk} className="inline-block align-middle">
+            <motion.span variants={heroPhraseReveal} className="inline-block align-middle">
               <Avatar />
             </motion.span>
-            <motion.span variants={chunk}>I&apos;m </motion.span>
-            <motion.span variants={chunk} className="selected-name">Phani&nbsp;Varun&nbsp;Munukuntla</motion.span>
-            <motion.span variants={chunk}> — a Security Engineer fluent in </motion.span>
-            <motion.span variants={chunk} className="italic-sharp">Application Security, GenAI and Backend Systems</motion.span>
-            <motion.span variants={chunk}>. Based in the US and India, available to teams shipping AI they can actually trust, from first commit to production.</motion.span>
+            <motion.span variants={heroPhraseReveal}>I&apos;m </motion.span>
+            <motion.span variants={heroPhraseReveal} className="selected-name">Phani&nbsp;Varun&nbsp;Munukuntla</motion.span>
+            <motion.span variants={heroPhraseReveal}> — a Security Engineer fluent in </motion.span>
+            <motion.span variants={heroPhraseReveal} className="italic-sharp">Application Security, GenAI and Backend Systems</motion.span>
+            <motion.span variants={heroPhraseReveal}>. Based in the US and India, available to teams shipping AI they can actually trust, from first commit to production.</motion.span>
           </motion.h1>
         </motion.section>
 
@@ -425,12 +451,26 @@ export default function Hero() {
         </section>
 
         <section className="pb-24">
-          <div className="flex flex-wrap gap-2 mb-3">
+          <motion.div
+            className="flex flex-wrap gap-2 mb-3"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  delayChildren: 0.58,
+                  staggerChildren: 0.045,
+                },
+              },
+            }}
+          >
             {PILLS.map((p) => {
               const used = usedPills.has(p.kind);
               return (
-                <button
+                <motion.button
                   key={p.label}
+                  variants={pillReveal}
                   onClick={() => handleQuery(p.label, p.kind)}
                   disabled={used}
                   className={`pill premium-action ${p.sparkles && !used ? 'pill-active' : ''} ${used ? 'pill-used' : ''}`}
@@ -444,12 +484,18 @@ export default function Hero() {
                   )}
                   <span>{p.label}</span>
                   {arrowFor(p)}
-                </button>
+                </motion.button>
               );
             })}
-          </div>
+          </motion.div>
 
-          <form onSubmit={handleInputSubmit} className="relative">
+          <motion.form
+            onSubmit={handleInputSubmit}
+            className="relative"
+            initial={{ opacity: 0, y: 6, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.26, delay: 0.74, ease: 'easeOut' }}
+          >
             <span className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-500 font-mono text-[13px] tracking-tight pointer-events-none">
               &gt;_
             </span>
@@ -476,7 +522,7 @@ export default function Hero() {
             >
               <SubmitIcon />
             </button>
-          </form>
+          </motion.form>
         </section>
       </div>
     </main>

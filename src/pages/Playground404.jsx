@@ -18,6 +18,39 @@ const PARTICLE_POOL = 48;
 const WARNING_DURATION = 1.0;
 const DANGER_DISTANCE = 70;
 
+const NAME_MIN = 1;
+const NAME_MAX = 18;
+const SCORE_MAX = 99999;
+const NAME_ALLOWED = /^[\p{L}\p{M}\p{N} ._'-]+$/u;
+// Strip zero-width chars and bidirectional overrides (lookalike/spoofing defense)
+const ZW_BIDI_RE = /[\u200B-\u200F\u202A-\u202E\u2060-\u2064\uFEFF]/g;
+// eslint-disable-next-line no-control-regex
+const CTRL_RE = /[\x00-\x1F\x7F]/g;
+
+function sanitizeName(raw) {
+  if (typeof raw !== 'string') return '';
+  return raw
+    .normalize('NFC')
+    .replace(CTRL_RE, '')
+    .replace(ZW_BIDI_RE, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, NAME_MAX);
+}
+
+function validateName(name) {
+  if (name.length < NAME_MIN) return 'Enter at least 1 character.';
+  if (name.length > NAME_MAX) return `Keep it under ${NAME_MAX + 1} characters.`;
+  if (!NAME_ALLOWED.test(name)) return "Use letters, numbers, spaces or . _ - ' only.";
+  return null;
+}
+
+function loadPlayerName() {
+  if (typeof window === 'undefined') return '';
+  const cleaned = sanitizeName(window.localStorage.getItem(PLAYER_NAME_KEY) || '');
+  return validateName(cleaned) === null ? cleaned : '';
+}
+
 function loadLeaderboard() {
   if (typeof window === 'undefined') return [];
   try {
@@ -26,7 +59,13 @@ function loadLeaderboard() {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     return parsed
-      .filter((e) => e && typeof e.name === 'string' && typeof e.score === 'number')
+      .filter((e) => e && typeof e.name === 'string' && Number.isFinite(e.score))
+      .map((e) => ({
+        name: sanitizeName(e.name),
+        score: Math.max(0, Math.min(SCORE_MAX, Number(e.score))),
+        at: Number.isFinite(e.at) ? e.at : 0,
+      }))
+      .filter((e) => validateName(e.name) === null)
       .sort((a, b) => b.score - a.score)
       .slice(0, LEADERBOARD_CAP);
   } catch {
@@ -70,11 +109,13 @@ function navigate(path) {
 
 export default function Playground404() {
   const [screen, setScreen] = useState('intro');
-  const [playerName, setPlayerName] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    return window.localStorage.getItem(PLAYER_NAME_KEY) || '';
-  });
+  const [playerName, setPlayerName] = useState(loadPlayerName);
   const [leaderboard, setLeaderboard] = useState(loadLeaderboard);
+
+  useEffect(() => {
+    document.body.classList.add('is-playground');
+    return () => document.body.classList.remove('is-playground');
+  }, []);
 
   return (
     <main className="playground-page">
@@ -86,7 +127,6 @@ export default function Playground404() {
             key="intro"
             onBack={() => navigate('/')}
             onPlay={() => setScreen(playerName ? 'game' : 'name')}
-            leaderboardCount={leaderboard.length}
           />
         )}
 
@@ -96,8 +136,10 @@ export default function Playground404() {
             initialName={playerName}
             onBack={() => setScreen('intro')}
             onConfirm={(name) => {
-              window.localStorage.setItem(PLAYER_NAME_KEY, name);
-              setPlayerName(name);
+              const safe = sanitizeName(name);
+              if (validateName(safe) !== null) return;
+              window.localStorage.setItem(PLAYER_NAME_KEY, safe);
+              setPlayerName(safe);
               setScreen('game');
             }}
           />
@@ -118,7 +160,7 @@ export default function Playground404() {
   );
 }
 
-function IntroScreen({ onBack, onPlay, leaderboardCount }) {
+function IntroScreen({ onBack, onPlay }) {
   return (
     <motion.section
       className="playground-panel playground-panel--intro"
@@ -135,7 +177,6 @@ function IntroScreen({ onBack, onPlay, leaderboardCount }) {
       <ul className="intro-meta">
         <li><span>Game</span><strong>Dot Dodger</strong></li>
         <li><span>Controls</span><strong>Mouse</strong></li>
-        <li><span>Players</span><strong>{leaderboardCount}</strong></li>
       </ul>
       <div className="not-found-actions">
         <button type="button" className="not-found-button not-found-button--ghost premium-action" onClick={onBack}>
@@ -150,18 +191,29 @@ function IntroScreen({ onBack, onPlay, leaderboardCount }) {
 }
 
 function NameScreen({ initialName, onBack, onConfirm }) {
-  const [name, setName] = useState(initialName);
+  const [raw, setRaw] = useState(initialName);
   const inputRef = useRef(null);
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
+  const cleaned = sanitizeName(raw);
+  const error = raw.length > 0 ? validateName(cleaned) : null;
+  const canSubmit = error === null && cleaned.length >= NAME_MIN;
+
+  const handleChange = (event) => {
+    const next = event.target.value
+      .replace(CTRL_RE, '')
+      .replace(ZW_BIDI_RE, '')
+      .slice(0, NAME_MAX);
+    setRaw(next);
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    const trimmed = name.trim().slice(0, 18);
-    if (!trimmed) return;
-    onConfirm(trimmed);
+    if (!canSubmit) return;
+    onConfirm(cleaned);
   };
 
   return (
@@ -175,22 +227,31 @@ function NameScreen({ initialName, onBack, onConfirm }) {
       <div className="not-found-kicker">Player tag</div>
       <h1>What should we call you?</h1>
       <p>Your tag shows up on the leaderboard.</p>
-      <form className="name-form" onSubmit={handleSubmit}>
+      <form className="name-form" onSubmit={handleSubmit} noValidate>
         <input
           ref={inputRef}
-          className="name-input"
+          className={`name-input${error ? ' is-invalid' : ''}`}
           type="text"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          maxLength={18}
+          value={raw}
+          onChange={handleChange}
+          maxLength={NAME_MAX}
           placeholder="e.g. quickfox"
           aria-label="Your player tag"
+          aria-invalid={error ? 'true' : 'false'}
+          aria-describedby={error ? 'name-error' : undefined}
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+          inputMode="text"
         />
+        <p id="name-error" className="name-error" role="alert" aria-live="polite">
+          {error || ' '}
+        </p>
         <div className="not-found-actions">
           <button type="button" className="not-found-button not-found-button--ghost premium-action" onClick={onBack}>
             Back
           </button>
-          <button type="submit" className="not-found-button premium-action" disabled={!name.trim()}>
+          <button type="submit" className="not-found-button premium-action" disabled={!canSubmit}>
             Start
           </button>
         </div>
@@ -237,11 +298,6 @@ function GameScreen({ playerName, leaderboard, onLeaderboardChange, onChangeName
   useEffect(() => {
     statusRef.current = status;
   }, [status]);
-
-  useEffect(() => {
-    document.body.classList.add('is-playground');
-    return () => document.body.classList.remove('is-playground');
-  }, []);
 
   useEffect(() => {
     const handlePointer = (event) => {
@@ -333,7 +389,13 @@ function GameScreen({ playerName, leaderboard, onLeaderboardChange, onChangeName
     const rounded = Math.round(final * 10) / 10;
     setElapsed(rounded);
 
-    const entry = { name: playerName, score: rounded, at: Date.now() };
+    const safeName = sanitizeName(playerName);
+    if (validateName(safeName) !== null) {
+      setStatus('over');
+      return;
+    }
+    const cappedScore = Math.max(0, Math.min(SCORE_MAX, rounded));
+    const entry = { name: safeName, score: cappedScore, at: Date.now() };
     const nextBoard = [...leaderboard, entry]
       .sort((a, b) => b.score - a.score)
       .slice(0, LEADERBOARD_CAP);
@@ -522,14 +584,11 @@ function GameScreen({ playerName, leaderboard, onLeaderboardChange, onChangeName
       transition={{ duration: 0.36, ease: 'easeOut' }}
     >
       <div className="game-topbar">
-        <div className="game-topbar__player">
-          <span className="not-found-kicker">Playing as</span>
-          <button type="button" className="game-name-pill" onClick={onChangeName} aria-label="Change player tag">
-            {playerName}
-            <span aria-hidden="true">↻</span>
-          </button>
-        </div>
-        <div className="game-hud">
+        <button type="button" className="game-back-pill" onClick={onExit} aria-label="Back to portfolio">
+          <span aria-hidden="true">←</span>
+          Back to portfolio
+        </button>
+        <div className="game-hud game-hud--topbar">
           <div className="game-hud__stat">
             <span className="game-hud__label">Time</span>
             <span className="game-hud__value">{formatTime(elapsed)}</span>
@@ -589,7 +648,7 @@ function GameScreen({ playerName, leaderboard, onLeaderboardChange, onChangeName
                 transition={{ duration: 0.28 }}
               >
                 {status === 'ready' ? (
-                  <ReadyContents onStart={startGame} />
+                  <ReadyContents onStart={startGame} onExit={onExit} />
                 ) : (
                   <OverContents
                     elapsed={elapsed}
@@ -608,13 +667,14 @@ function GameScreen({ playerName, leaderboard, onLeaderboardChange, onChangeName
           entries={leaderboard}
           playerName={playerName}
           highlightAt={status === 'over' ? lastEntryAt : 0}
+          onChangeName={onChangeName}
         />
       </div>
     </motion.section>
   );
 }
 
-function ReadyContents({ onStart }) {
+function ReadyContents({ onStart, onExit }) {
   return (
     <motion.div
       className="game-overlay__inner"
@@ -624,15 +684,26 @@ function ReadyContents({ onStart }) {
     >
       <span className="game-overlay__title">Ready?</span>
       <span className="game-overlay__hint">Move the dot. Don't touch the signals. Survive.</span>
-      <motion.button
-        type="button"
-        className="not-found-button premium-action game-overlay__start"
-        onClick={onStart}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        Start
-      </motion.button>
+      <div className="game-overlay__actions">
+        <motion.button
+          type="button"
+          className="not-found-button not-found-button--ghost premium-action"
+          onClick={onExit}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
+        >
+          Back to portfolio
+        </motion.button>
+        <motion.button
+          type="button"
+          className="not-found-button premium-action"
+          onClick={onStart}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Start
+        </motion.button>
+      </div>
     </motion.div>
   );
 }
@@ -681,7 +752,7 @@ function OverContents({ elapsed, isNewBest, rank, onPlayAgain, onExit }) {
   );
 }
 
-function Leaderboard({ entries, playerName, highlightAt }) {
+function Leaderboard({ entries, playerName, highlightAt, onChangeName }) {
   return (
     <aside className="game-leaderboard" aria-label="Leaderboard">
       <header>
@@ -713,6 +784,12 @@ function Leaderboard({ entries, playerName, highlightAt }) {
           </AnimatePresence>
         </ol>
       )}
+      <footer className="game-leaderboard__footer">
+        <span className="game-leaderboard__you">You: <strong>{playerName}</strong></span>
+        <button type="button" className="game-leaderboard__change" onClick={onChangeName}>
+          Change tag
+        </button>
+      </footer>
     </aside>
   );
 }

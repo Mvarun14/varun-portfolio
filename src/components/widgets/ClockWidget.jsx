@@ -7,6 +7,13 @@ function format(now, timeZone) {
   return new Intl.DateTimeFormat('en-GB', opts).format(now);
 }
 
+function flagEmoji(code) {
+  if (typeof code !== 'string' || code.length !== 2 || !/^[A-Za-z]{2}$/.test(code)) return '';
+  const base = 0x1F1E6 - 'A'.charCodeAt(0);
+  const upper = code.toUpperCase();
+  return String.fromCodePoint(upper.charCodeAt(0) + base, upper.charCodeAt(1) + base);
+}
+
 export default function ClockWidget({
   style,
   location = 'Hyderabad, IN',
@@ -14,12 +21,16 @@ export default function ClockWidget({
   abbr = 'IST',
   utc = 'UTC+5:30',
   rotate = 3,
+  countryCode,
 }) {
   const [now, setNow] = useState(new Date());
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
+
+  const derivedCode = countryCode ?? location.match(/,\s*([A-Za-z]{2})\s*$/)?.[1] ?? '';
+  const flag = flagEmoji(derivedCode);
 
   return (
     <Widget style={style} rotate={rotate}>
@@ -31,8 +42,13 @@ export default function ClockWidget({
           }}
           className="absolute -top-2 -right-2 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white"
         />
-        <div className="text-[9px] tracking-[0.18em] text-neutral-500 font-medium uppercase mb-0.5">
-          {location}
+        <div className="flex items-center gap-1.5 mb-0.5">
+          {flag && (
+            <span className="text-[13px] leading-none" aria-hidden="true">{flag}</span>
+          )}
+          <span className="text-[9px] tracking-[0.18em] text-neutral-500 font-medium uppercase">
+            {location}
+          </span>
         </div>
         <div className="flex items-baseline gap-1">
           <span className="text-[26px] font-medium text-neutral-900 tabular-nums tracking-tight">{format(now, timeZone)}</span>

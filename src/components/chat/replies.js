@@ -136,6 +136,17 @@ export const REPLIES = {
     text: "Here's the full timeline — most recent first.",
     timeline: [
       {
+        dates: 'MAR 2026 — PRESENT',
+        location: 'New York, USA · Remote',
+        title: 'AI Fellow — Contract',
+        company: 'Handshake',
+        bullets: [
+          'Evaluated and rated complex AI model responses for Project Alloy, ensuring accuracy and rigour across advanced math and science domains.',
+          'Reviewed specialised model outputs for Project Ohm, verifying correctness and safety for high-stakes technical and engineering fields.',
+          'Audited, debugged, and refined intricate code samples for Project Helix to train frontier models on writing more secure, reliable, and production-grade software.',
+        ],
+      },
+      {
         dates: 'MAR 2025 — DEC 2025',
         location: 'Buffalo, USA',
         title: 'Graduate Assistant — Software Security',

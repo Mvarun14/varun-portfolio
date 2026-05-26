@@ -57,7 +57,8 @@ export default function WorkSection() {
           <PolaroidWidget style={{ top: '8%', left: '4%' }} show={inView} />
           <ClockWidget
             style={{ top: '38%', left: '4%' }}
-            location="Hyderabad, IN"
+            location="India"
+            countryCode="IN"
             timeZone="Asia/Kolkata"
             abbr="IST"
             utc="UTC+5:30"
